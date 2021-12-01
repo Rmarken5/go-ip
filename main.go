@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -26,8 +27,13 @@ func main() {
 }
 
 func ipFunc(writer http.ResponseWriter, request *http.Request) {
-	_, err := io.WriteString(writer, request.RemoteAddr)
+	log.Printf("header: %v\n", request.Header)
+	forwardedString := request.Header.Get("Forwarded")
+	log.Println(forwardedString)
+	ipAddr := strings.TrimRight(strings.TrimLeft(forwardedString, "\""), "\"")
+	log.Println(ipAddr)
+	_, err := io.WriteString(writer, ipAddr)
 	if err != nil {
-		log.Printf("Error: %v\n", err)
+		log.Fatalf("error WriteString data  forwarded[\"for\"]: %v", err)
 	}
 }
